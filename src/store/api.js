@@ -29,7 +29,7 @@ export const api = createApi({
     }),
     getProject: builder.query({
       query: (id) => `/projects/${id}`,
-      providesTags: ["Projects"],
+      providesTags: ["Project"],
     }),
     createProject: builder.mutation({
       query: (project) => ({
@@ -94,6 +94,22 @@ export const api = createApi({
         body: data,
       }),
     }),
+
+    addUser: builder.mutation({
+      query: ({ projectId, email }) => ({
+        url: `/projects/${projectId}/add`,
+        method: "POST",
+        body: { email },
+      }),
+      invalidatesTags: ["Projects","Project"], 
+    }),
+    deleteUser: builder.mutation({
+      query: ({ projectId, memberId }) => ({
+        url: `/projects/${projectId}/remove/${memberId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Projects","Project"], 
+    }),
   }),
 });
 
@@ -109,5 +125,7 @@ export const {
   useUpdateReportMutation,
   useGetUsersQuery,
   useCreateUserMutation,
-  useChangePasswordMutation
+  useChangePasswordMutation,
+  useAddUserMutation,
+  useDeleteUserMutation
 } = api;

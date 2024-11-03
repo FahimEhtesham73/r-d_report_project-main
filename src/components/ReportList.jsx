@@ -106,7 +106,8 @@ export default function ReportList({ projectId, canAdd }) {
                     </Typography>
                     <br />
                     <Typography component="span" variant="body2">
-                      Accuracy: {report.accuracy}%
+                      Accuracy: {report.accuracy}%<br />
+                      Author: {report.author?.name || 'Unknown'} {/* Display the author's name */}
                     </Typography>
                   </Box>
                 }

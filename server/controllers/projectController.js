@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import Project from "../models/Project.js";
-
+import User from '../models/User.js';
 export const createProject = async (req, res) => {
   try {
     const {
@@ -84,5 +84,53 @@ export const deleteProject = async (req, res) => {
     res.json({ message: "Project deleted" });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const addTeamMember = async (req, res) => {
+  const { projectId } = req.params;
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Check if user is already a member
+    if (project.projectMembers.includes(user._id)) {
+      return res.status(400).json({ message: 'User is already a team member' });
+    }
+
+    project.projectMembers.push(user._id);
+    await project.save();
+    
+    res.status(200).json({ message: 'Team member added successfully', project });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+export const removeTeamMember = async (req, res) => {
+  const { projectId, memberId } = req.params;
+
+  try {
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Remove member from project
+    project.projectMembers = project.projectMembers.filter(member => member.toString() !== memberId);
+    await project.save();
+
+    res.status(200).json({ message: 'Team member removed successfully', project });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
   }
 };

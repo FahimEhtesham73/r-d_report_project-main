@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   List,
   ListItem,
@@ -14,37 +15,41 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  CircularProgress,
 } from '@mui/material';
 import { Delete as DeleteIcon } from '@mui/icons-material';
-import { useState } from 'react';
-import { api } from '../store/api';
+import { useAddUserMutation, useDeleteUserMutation } from '../store/api';
+
 
 export default function TeamList({ projectId, canManageTeam, members, lead }) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
-  const [updateProject] = api.useUpdateProjectMutation();
+  const [loadingRemove, setLoadingRemove] = useState(null); // Holds member ID of the loading removal
+
+  // Redux Toolkit Query hooks for API calls
+  const [addMember, { isLoading: loadingAdd }] = useAddUserMutation();
+  const [removeMember] = useDeleteUserMutation();
 
   const handleAddMember = async () => {
     try {
-      await updateProject({
-        id: projectId,
-        members: [...members.map(m => m._id), email]
-      });
+      await addMember({ projectId, email }).unwrap(); // Unwrap the promise to handle success/error
       setOpen(false);
       setEmail('');
+      // Optionally refetch or update the members list here if necessary
     } catch (error) {
       console.error('Failed to add member:', error);
     }
   };
 
   const handleRemoveMember = async (memberId) => {
+    setLoadingRemove(memberId);
     try {
-      await updateProject({
-        id: projectId,
-        members: members.filter(m => m._id !== memberId).map(m => m._id)
-      });
+      await removeMember({ projectId, memberId }).unwrap(); // Unwrap the promise to handle success/error
+      // Optionally refetch or update the members list here if necessary
     } catch (error) {
       console.error('Failed to remove member:', error);
+    } finally {
+      setLoadingRemove(null);
     }
   };
 
@@ -75,8 +80,8 @@ export default function TeamList({ projectId, canManageTeam, members, lead }) {
               key={member._id}
               secondaryAction={
                 canManageTeam && member._id !== lead._id && (
-                  <IconButton onClick={() => handleRemoveMember(member._id)}>
-                    <DeleteIcon />
+                  <IconButton onClick={() => handleRemoveMember(member._id)} disabled={loadingRemove === member._id}>
+                    {loadingRemove === member._id ? <CircularProgress size={24} /> : <DeleteIcon />}
                   </IconButton>
                 )
               }
@@ -108,8 +113,8 @@ export default function TeamList({ projectId, canManageTeam, members, lead }) {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={handleAddMember} variant="contained">
-            Add
+          <Button onClick={handleAddMember} variant="contained" disabled={loadingAdd}>
+            {loadingAdd ? <CircularProgress size={24} /> : 'Add'}
           </Button>
         </DialogActions>
       </Dialog>
