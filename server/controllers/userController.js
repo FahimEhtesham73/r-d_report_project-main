@@ -18,13 +18,33 @@ export const getUser = async (req, res) => {
   }
 };
 
+// Delete a user (admin only, cannot delete themselves)
 export const deleteUser = async (req, res) => {
-  try {
-    await User.findByIdAndDelete(req.params.id);
-    res.json({ message: "User deleted" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  const { id } = req.params;
+
+  // Use findByIdAndDelete to delete the user directly
+  const user = await User.findByIdAndDelete(id);
+
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
   }
+
+  res.json({ message: 'User deleted successfully' });
+}
+
+// Change user role (admin only)
+export const changeUserRole =async (req, res) => {
+  const { id } = req.params;
+  const { role } = req.body;
+
+  const user = await User.findById(id);
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  user.userType = role;
+  await user.save();
+  res.json({ message: 'User role updated successfully', user });
 };
 
 export const createUser = async (req, res) => {

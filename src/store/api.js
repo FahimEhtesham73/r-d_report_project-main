@@ -110,6 +110,27 @@ export const api = createApi({
       }),
       invalidatesTags: ["Projects","Project"], 
     }),
+
+
+
+    // Delete User
+    deleteUserDatabase: builder.mutation({
+      query: (userId) => ({
+        url: `/users/${userId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Users"], 
+    }),
+
+    // Change User Role
+    changeUserRole: builder.mutation({
+      query: ({ userId, newRole }) => ({
+        url: `/users/${userId}/role`,
+        method: "PUT",
+        body: { userType: newRole },
+      }),
+      invalidatesTags: ["Users"], 
+    }),
   }),
 });
 
@@ -128,5 +149,7 @@ export const {
   useChangePasswordMutation,
   useAddUserMutation,
   useDeleteUserMutation,
+  useDeleteUserDatabaseMutation,
+  useChangeUserRoleMutation
  
 } = api;
