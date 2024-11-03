@@ -67,7 +67,7 @@ const FilePreview = ({ file }) => {
   );
 };
 
-export default function ReportList({ projectId, canAdd }) {
+export default function ReportList({ projectId, canAdd,canDelete }) {
   const navigate = useNavigate();
   const { data: reports, isLoading } = api.useGetReportsQuery(projectId);
   const [deleteReport] = api.useDeleteReportMutation(); // API hook for deleting reports
@@ -187,9 +187,9 @@ export default function ReportList({ projectId, canAdd }) {
           <Button onClick={() => setOpenDialog(false)} color="primary">
             Cancel
           </Button>
-          <Button onClick={() => handleDelete(reportToDelete)} color="error">
+          {canDelete&&<Button onClick={() => handleDelete(reportToDelete)} color="error">
             Delete
-          </Button>
+          </Button>}
         </DialogActions>
       </Dialog>
     </Box>
