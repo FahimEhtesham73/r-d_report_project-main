@@ -88,43 +88,14 @@ export const getSingleReport = async (req, res) => {
 
 export const updateReport = async (req, res) => {
   try {
-    const {
-      title,
-      project,
-      author,
-      description,
-      accuracy,
-      status,
-      researchPapers,
-    } = req.body;
-
-  
-    // Update report document
-    const report = await Report.findByIdAndUpdate(
-      req.params.id,
-      {
-        title,
-        project: project ? new mongoose.Types.ObjectId(project._id) : undefined,
-        author: author ? new mongoose.Types.ObjectId(author._id) : undefined,
-        description,
-        accuracy,
-        status,
-        researchPapers,
-      },
-      { new: true }
-    );
-
-    if (!report) {
-      return res.status(404).json({ error: "Report not found." });
-    }
-
+    const report = await Report.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
     res.json(report);
   } catch (error) {
-    console.error("Error updating report:", error);
-    res.status(500).json({ error: "Failed to update report." });
+    res.status(400).json({ error: error.message });
   }
 };
-
 
 export const deleteReport = async (req, res) => {
   try {
