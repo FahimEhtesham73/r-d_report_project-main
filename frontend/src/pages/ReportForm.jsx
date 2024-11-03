@@ -10,9 +10,9 @@ import {
   Grid,
   CircularProgress,
 } from "@mui/material";
-import { api } from "../store/api";
+import { api, useCreateReportMutation, useEditReportMutation } from "../store/api";
 import { useAuth } from "../contexts/AuthContext";
-
+import { toast } from "react-toastify";
 export default function ReportForm() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -29,8 +29,8 @@ export default function ReportForm() {
 
   const [files, setFiles] = useState([]);
   const { data: report } = api.useGetReportQuery(id, { skip: !id });
-  const [createReport, { isLoading: isLoadingCreate }] = api.useCreateReportMutation();
-  const [updateReport, { isLoading: isLoadingUpdate }] = api.useUpdateReportMutation();
+  const [createReport, { isLoading: isLoadingCreate }] = useCreateReportMutation();
+  const [updateReport, { isLoading: isLoadingUpdate }] = useEditReportMutation();
 
 
   const isLoading = isLoadingCreate || isLoadingUpdate;
@@ -75,24 +75,32 @@ const handleSubmit = async (e) => {
   if (formData.accuracy) {
     formDataObj.set("accuracy", Number(formData.accuracy));
   }
-  
-  console.log([...formDataObj]); // Use spread operator to log FormData contents
 
+  const updatedData = {
+    ...formData,
+    files: files.map((file) => (typeof file === "string" ? file : file.name)),
+  
+  };
+  
   try {
     if (id) {
-      // Pass formData directly
-      await updateReport({ id, formData: formData })
+      // Update existing report
+      await updateReport({ id, updatedData })
         .unwrap()
         .then((response) => {
           console.log({ "response update": response });
+         toast.success("Report updated successfully", { type: "success" })
+          navigate(`/projects/${formData?.project}`);
         });
     } else {
+      // Create new report
       await createReport(formDataObj)
         .unwrap()
         .then((response) => {
           console.log({ "response create": response });
+          toast("Report created successfully", { type: "success" })
+          navigate(`/projects/${formData?.project}`);
         });
-      navigate(`/projects/${formData?.project}`);
     }
   } catch (error) {
     console.error("Failed to save report:", error);

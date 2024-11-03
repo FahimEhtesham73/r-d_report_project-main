@@ -10,8 +10,13 @@ import {
   Typography,
   Paper,
   Grid,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
-import { Edit as EditIcon } from "@mui/icons-material";
+import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { FaFilePdf, FaFileWord, FaFileVideo, FaFileAudio, FaFile } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { api } from "../store/api";
@@ -19,21 +24,20 @@ import { MdDownload } from "react-icons/md";
 
 const getFileIcon = (mimeType) => {
   if (mimeType.startsWith("image/")) {
-    return null; // Return null for images to use the preview
+    return null;
   }
   if (mimeType === "application/pdf") {
-    return <FaFilePdf style={{ fontSize: '24px' }} />; // PDF icon
+    return <FaFilePdf style={{ fontSize: '24px' }} />;
   }
   if (mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
-    return <FaFileWord style={{ fontSize: '24px' }} />; // DOCX icon
+    return <FaFileWord style={{ fontSize: '24px' }} />;
   }
   if (mimeType.startsWith("video/")) {
-    return <FaFileVideo style={{ fontSize: '24px' }} />; // Video icon
+    return <FaFileVideo style={{ fontSize: '24px' }} />;
   }
   if (mimeType.startsWith("audio/")) {
-    return <FaFileAudio style={{ fontSize: '24px' }} />; // Audio icon
+    return <FaFileAudio style={{ fontSize: '24px' }} />;
   }
-  // Default icon for unknown file types
   return <FaFile style={{ fontSize: '24px' }} />;
 };
 
@@ -66,6 +70,23 @@ const FilePreview = ({ file }) => {
 export default function ReportList({ projectId, canAdd }) {
   const navigate = useNavigate();
   const { data: reports, isLoading } = api.useGetReportsQuery(projectId);
+  const [deleteReport] = api.useDeleteReportMutation(); // API hook for deleting reports
+  const [openDialog, setOpenDialog] = useState(false);
+  const [reportToDelete, setReportToDelete] = useState(null);
+
+  const handleDelete = async (reportId) => {
+    try {
+      await deleteReport(reportId);
+      setOpenDialog(false);
+    } catch (error) {
+      console.error("Failed to delete report:", error);
+    }
+  };
+
+  const confirmDelete = (reportId) => {
+    setReportToDelete(reportId);
+    setOpenDialog(true);
+  };
 
   if (isLoading) {
     return <Typography variant="h6" sx={{ textAlign: 'center' }}>Loading reports...</Typography>;
@@ -107,20 +128,24 @@ export default function ReportList({ projectId, canAdd }) {
                     <br />
                     <Typography component="span" variant="body2">
                       Accuracy: {report.accuracy}%<br />
-                      Author: {report.author?.name || 'Unknown'} {/* Display the author's name */}
+                      Author: {report.author?.name || 'Unknown'}
                     </Typography>
                   </Box>
                 }
               />
               <ListItemSecondaryAction>
                 {canAdd && (
-                  <IconButton onClick={() => navigate(`/reports/${report._id}/edit`)}>
-                    <EditIcon />
-                  </IconButton>
+                  <>
+                    <IconButton onClick={() => navigate(`/reports/${report._id}/edit`)}>
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton onClick={() => confirmDelete(report._id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </>
                 )}
               </ListItemSecondaryAction>
 
-              {/* Display files if they exist */}
               {report.files && report.files.length > 0 && (
                 <Grid container spacing={1} sx={{ mt: 2 }}>
                   {report.files.map((file) => (
@@ -130,8 +155,8 @@ export default function ReportList({ projectId, canAdd }) {
                         <IconButton
                           onClick={() => {
                             const link = document.createElement("a");
-                            link.href = `/${file.path}`; // Ensure backend serves this file correctly
-                            link.download = file.filename; // Specify the filename for download
+                            link.href = `/${file.path}`;
+                            link.download = file.filename;
                             link.click();
                           }}
                         >
@@ -146,6 +171,27 @@ export default function ReportList({ projectId, canAdd }) {
           ))}
         </List>
       </Paper>
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+      >
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this report? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={() => handleDelete(reportToDelete)} color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

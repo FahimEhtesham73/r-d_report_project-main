@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-export default function ProjectCard({ project }) {
+export default function ProjectCard({ project, onDelete, showDelete }) {
   const navigate = useNavigate();
 
   return (
@@ -30,6 +30,15 @@ export default function ProjectCard({ project }) {
         >
           View Details
         </Button>
+        {showDelete && (
+          <Button
+            size="small"
+            color="error"
+            onClick={() => onDelete(project._id)}
+          >
+            Delete
+          </Button>
+        )}
       </CardActions>
     </Card>
   );

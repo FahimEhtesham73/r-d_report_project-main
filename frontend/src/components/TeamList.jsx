@@ -68,18 +68,18 @@ export default function TeamList({ projectId, canManageTeam, members, lead }) {
         <List>
           <ListItem>
             <ListItemAvatar>
-              <Avatar>{lead.name[0]}</Avatar>
+              <Avatar>{lead?.name[0]}</Avatar>
             </ListItemAvatar>
             <ListItemText
-              primary={lead.name}
+              primary={lead?.name}
               secondary="Project Lead"
             />
           </ListItem>
-          {members.map((member) => (
+          {members?.map((member) => (
             <ListItem
               key={member._id}
               secondaryAction={
-                canManageTeam && member._id !== lead._id && (
+                canManageTeam && member._id !== lead?._id && (
                   <IconButton onClick={() => handleRemoveMember(member._id)} disabled={loadingRemove === member._id}>
                     {loadingRemove === member._id ? <CircularProgress size={24} /> : <DeleteIcon />}
                   </IconButton>

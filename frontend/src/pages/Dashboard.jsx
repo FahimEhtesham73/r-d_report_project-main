@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+// Dashboard.js
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Grid,
@@ -13,12 +14,25 @@ import { api } from "../store/api";
 import { useAuth } from "../contexts/AuthContext";
 import ProjectCard from "../components/ProjectCard";
 import CreateProjectModal from "../components/CreateProjectModal";
+import { toast } from "react-toastify";
+
 export default function Dashboard() {
   const [isOpenProjectModal, setIsOpenProjectModal] = useState(false);
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useAuth();  // Get user info from context
   const [searchTerm, setSearchTerm] = useState("");
   const { data: projects, isLoading, error } = api.useGetProjectsQuery();
+  const [deleteProject] = api.useDeleteProjectMutation();
+
+  const handleDeleteProject = async (projectId) => {
+    try {
+      await deleteProject(projectId).unwrap();
+      toast.success("Project deleted successfully!");
+      // Optionally, you can show a success message or refresh the project list
+    } catch (error) {
+      console.error("Failed to delete the project: ", error);
+    }
+  };
 
   // Filter projects based on the search term
   const filteredProjects = projects?.filter(
@@ -57,20 +71,23 @@ export default function Dashboard() {
             New Project
           </Button>
         )}
-
         <CreateProjectModal
           isOpen={isOpenProjectModal}
           closeModal={() => setIsOpenProjectModal(false)}
         />
       </Box>
 
-      {((!projects || projects.length === 0) && (
+      {(!projects || projects.length === 0) ? (
         <Typography>No projects found</Typography>
-      )) || (
+      ) : (
         <Grid container spacing={3}>
           {filteredProjects.map((project) => (
             <Grid item xs={12} sm={6} md={4} key={project._id}>
-              <ProjectCard project={project} />
+              <ProjectCard 
+                project={project} 
+                onDelete={handleDeleteProject} 
+                showDelete={user.userType === "admin" || user.userType === "projectLead"} // Conditional render
+              />
             </Grid>
           ))}
         </Grid>

@@ -4,7 +4,8 @@ import {
   getReports,
   updateReport,
   deleteReport,
-  getSingleReport
+  getSingleReport,
+  editReport
 } from "../controllers/reportController.js";
 import multer from 'multer';
 // Set up multer storage
@@ -28,6 +29,7 @@ router.get("/:project", getReports);
 router.get("/report/:report", getSingleReport);
 
 router.put("/:id", updateReport);
+router.put("/edit/:id", editReport);
 router.delete("/:id", deleteReport);
 
 export default router;

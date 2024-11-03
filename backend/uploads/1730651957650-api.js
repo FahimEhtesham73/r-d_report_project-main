@@ -39,6 +39,9 @@ export const api = createApi({
       }),
       invalidatesTags: ["Projects"],
     }),
+    
+
+    
     updateProject: builder.mutation({
       query: ({ id, ...project }) => ({
         url: `/projects/${id}`,
@@ -111,8 +114,15 @@ export const api = createApi({
       invalidatesTags: ["Projects","Project"], 
     }),
 
+    deleteReport: builder.mutation({
+      query: (reportId) => ({
+        url: `/reports/${reportId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Reports"],
+    }),
 
-
+  
     // Delete User
     deleteUserDatabase: builder.mutation({
       query: (userId) => ({
@@ -150,6 +160,8 @@ export const {
   useAddUserMutation,
   useDeleteUserMutation,
   useDeleteUserDatabaseMutation,
-  useChangeUserRoleMutation
+  useChangeUserRoleMutation,
+  useDeleteReportMutation,
+
  
 } = api;

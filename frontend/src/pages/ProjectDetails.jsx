@@ -107,7 +107,7 @@ project={project}
       )}
 
       {activeTab === 2 && (
-        <ResearchPaperList projectId={id} canAdd={canEdit || isMember} />
+        <ResearchPaperList projectId={id} canAdd={canEdit || isMember} canDelete={canEdit} />
       )}
 
       {activeTab === 3 && (

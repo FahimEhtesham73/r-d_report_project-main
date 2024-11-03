@@ -14,8 +14,9 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 import { api } from '../store/api';
+import { toast } from 'react-toastify';
 
-export default function ResearchPaperList({ projectId, canAdd }) {
+export default function ResearchPaperList({ projectId, canAdd,canDelete }) {
   const [open, setOpen] = useState(false);
   const [paper, setPaper] = useState({
     title: '',
@@ -25,15 +26,17 @@ export default function ResearchPaperList({ projectId, canAdd }) {
     precision: '',
     recall: ''
   });
+  const [deletePaperId, setDeletePaperId] = useState(null); // State for deleting paper
 
   const { data: reports = [], isLoading, isError, error } = api.useGetReportsQuery(projectId);
   const [updateReport, { isLoading: isUpdating }] = api.useUpdateReportMutation();
+  const [deleteReport, { isLoading: isDeleting }] = api.useDeleteReportMutation(); // Hook for deleting
 
   console.log("Project ID:", projectId);
 
   const handleAddPaper = async () => {
     try {
-      const report = reports.find(r => r.project._id === projectId || r.project === projectId); 
+      const report = reports.find(r => r.project._id === projectId || r.project === projectId);
       if (report) {
         await updateReport({
           id: report._id,
@@ -58,6 +61,28 @@ export default function ResearchPaperList({ projectId, canAdd }) {
       });
     } catch (error) {
       console.error('Failed to add research paper:', error);
+    }
+  };
+
+  const handleDeletePaper = async (paperId) => {
+    const report = reports.find(r => r.project._id === projectId || r.project === projectId);
+    if (report) {
+      try {
+        await updateReport({
+          id: report._id,
+          researchPapers: report.researchPapers.filter(p => p._id !== paperId) // Filter out the paper to be deleted
+        })
+        .unwrap()
+        .then((response) => {
+          toast("Research paper deleted successfully", { type: "success" });
+          console.log('Research paper deleted successfully:', response);
+        })
+        .catch((error) => {
+          console.error('Failed to delete research paper:', error);
+        });
+      } catch (error) {
+        console.error('Failed to delete research paper:', error);
+      }
     }
   };
 
@@ -99,6 +124,9 @@ export default function ResearchPaperList({ projectId, canAdd }) {
                   </>
                 }
               />
+              {canDelete && <Button variant="outlined" color="error" onClick={() => handleDeletePaper(paper._id)} disabled={isDeleting}>
+                Delete
+              </Button>}
             </ListItem>
           ))}
         </List>
