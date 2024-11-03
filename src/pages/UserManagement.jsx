@@ -39,8 +39,8 @@ export default function UserManagement() {
   const { data: users, isLoading } = api.useGetUsersQuery();
   const [createUser, { isLoading: isLoadingCreateUser }] = useCreateUserMutation();
   const [deleteUser] = useDeleteUserDatabaseMutation();
-  const [changeUserRole] = useChangeUserRoleMutation();
-
+  const [changeUserRole,{isLoading:isLoadingChangeRole}] = useChangeUserRoleMutation();
+console.log({newRole})
   const handleSubmit = async () => {
     try {
       await createUser(formData).unwrap();
@@ -74,7 +74,11 @@ export default function UserManagement() {
 
   const handleChangeRole = async (userId) => {
     try {
-      await changeUserRole({ userId, role: newRole }).unwrap();
+      await changeUserRole({ userId, role: newRole })
+      .unwrap()
+      .then((res) => {
+        console.log("User role changed successfully:", res);
+      });
       toast.success("User role changed successfully.");
       setSelectedUser(null); // Close the dialog
     } catch (error) {
@@ -263,7 +267,14 @@ export default function UserManagement() {
             }}
             variant="contained"
           >
-            Change Role
+             { isLoadingChangeRole? (
+              <Box display="flex" alignItems="center">
+                <CircularProgress size={24} sx={{ mr: 1 }} />
+                Processing
+              </Box>
+            ) : (
+              "Change Role"
+            )}
           </Button>
         </DialogActions>
       </Dialog>

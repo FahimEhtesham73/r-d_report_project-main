@@ -124,10 +124,10 @@ export const api = createApi({
 
     // Change User Role
     changeUserRole: builder.mutation({
-      query: ({ userId, newRole }) => ({
+      query: ({ userId, role }) => ({  // Changed newRole to role
         url: `/users/${userId}/role`,
         method: "PUT",
-        body: { userType: newRole },
+        body: { userType: role }, // Sending userType
       }),
       invalidatesTags: ["Users"], 
     }),

@@ -32,20 +32,22 @@ export const deleteUser = async (req, res) => {
   res.json({ message: 'User deleted successfully' });
 }
 
-// Change user role (admin only)
-export const changeUserRole =async (req, res) => {
+export const changeUserRole = async (req, res) => {
   const { id } = req.params;
-  const { role } = req.body;
+  const { userType } = req.body;  // Changed from userType to newRole
+  console.log("body", req.body);
 
   const user = await User.findById(id);
   if (!user) {
     return res.status(404).json({ message: 'User not found' });
   }
 
-  user.userType = role;
+  user.userType = userType; // Changed userType to newRole
+  console.log({ user });
   await user.save();
   res.json({ message: 'User role updated successfully', user });
 };
+
 
 export const createUser = async (req, res) => {
   try {
