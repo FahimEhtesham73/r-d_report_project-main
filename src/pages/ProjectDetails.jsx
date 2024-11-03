@@ -16,6 +16,7 @@ import ReportList from "../components/ReportList";
 import TeamList from "../components/TeamList";
 import ResearchPaperList from "../components/ResearchPaperList";
 import EditProjectModal from "../components/EditProjectModal";
+import TeamContributionGraph from "../components/TeamContributionGraph";
 
 export default function ProjectDetails() {
   const [isOpenProjectModal, setIsOpenProjectModal] = useState(false);
@@ -71,6 +72,7 @@ project={project}
           <Tab label="Reports" />
           <Tab label="Research Papers" />
           <Tab label="Team" />
+          <Tab label="Contributon Graph" />
         </Tabs>
       </Paper>
 
@@ -114,6 +116,11 @@ project={project}
           canManageTeam={canEdit}
           members={project?.projectMembers}
           lead={project?.projectLead}
+        />
+      )}
+       {activeTab === 4 && (
+        <TeamContributionGraph
+        projectId={id}
         />
       )}
     </Box>
