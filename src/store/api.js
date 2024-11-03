@@ -54,7 +54,7 @@ export const api = createApi({
       providesTags: ["Reports"],
     }),
     getReport: builder.query({
-      query: (id) => `/reports/${id}`,
+      query: (id) => `/reports/report/${id}`,
       providesTags: ["Reports"],
     }),
     createReport: builder.mutation({

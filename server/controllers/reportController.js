@@ -69,17 +69,62 @@ export const getReports = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+export const getSingleReport = async (req, res) => {
+  try {
+    const { report: reportId } = req.params;
+    console.log(`Fetching report with ID: ${reportId}`);
+
+    const report = await Report.findById(reportId).populate("project author");
+
+    console.log({report})
+    if (!report) {
+      return res.status(404).json({ error: "Report not found" });
+    }
+    res.json(report);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};  
 
 export const updateReport = async (req, res) => {
   try {
-    const report = await Report.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const {
+      title,
+      project,
+      author,
+      description,
+      accuracy,
+      status,
+      researchPapers,
+    } = req.body;
+
+  
+    // Update report document
+    const report = await Report.findByIdAndUpdate(
+      req.params.id,
+      {
+        title,
+        project: project ? new mongoose.Types.ObjectId(project._id) : undefined,
+        author: author ? new mongoose.Types.ObjectId(author._id) : undefined,
+        description,
+        accuracy,
+        status,
+        researchPapers,
+      },
+      { new: true }
+    );
+
+    if (!report) {
+      return res.status(404).json({ error: "Report not found." });
+    }
+
     res.json(report);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error("Error updating report:", error);
+    res.status(500).json({ error: "Failed to update report." });
   }
 };
+
 
 export const deleteReport = async (req, res) => {
   try {

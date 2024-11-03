@@ -26,16 +26,25 @@ export default function ResearchPaperList({ projectId, canAdd }) {
     recall: ''
   });
 
-  const { data: reports } = api.useGetReportsQuery(projectId);
-  const [updateReport] = api.useUpdateReportMutation();
+  const { data: reports = [], isLoading, isError, error } = api.useGetReportsQuery(projectId);
+  const [updateReport, { isLoading: isUpdating }] = api.useUpdateReportMutation();
+
+  console.log("Project ID:", projectId);
 
   const handleAddPaper = async () => {
     try {
-      const report = reports.find(r => r.project === projectId);
+      const report = reports.find(r => r.project._id === projectId || r.project === projectId); 
       if (report) {
         await updateReport({
           id: report._id,
           researchPapers: [...report.researchPapers, paper]
+        })
+        .unwrap()
+        .then((response) => {
+          console.log('Research paper added successfully:', response);
+        })
+        .catch((error) => {
+          console.error('Failed to add research paper:', error);
         });
       }
       setOpen(false);
@@ -52,6 +61,9 @@ export default function ResearchPaperList({ projectId, canAdd }) {
     }
   };
 
+  if (isLoading) return <Typography>Loading...</Typography>;
+  if (isError) return <Typography>Error: {error.message}</Typography>;
+
   const papers = reports?.flatMap(report => report.researchPapers) || [];
 
   return (
@@ -59,7 +71,7 @@ export default function ResearchPaperList({ projectId, canAdd }) {
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h6">Research Papers</Typography>
         {canAdd && (
-          <Button variant="contained" onClick={() => setOpen(true)}>
+          <Button variant="contained" onClick={() => setOpen(true)} disabled={isUpdating}>
             Add Paper
           </Button>
         )}
@@ -145,8 +157,8 @@ export default function ResearchPaperList({ projectId, canAdd }) {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={handleAddPaper} variant="contained">
-            Add
+          <Button onClick={handleAddPaper} variant="contained" disabled={isUpdating}>
+            {isUpdating ? 'Adding...' : 'Add'}
           </Button>
         </DialogActions>
       </Dialog>

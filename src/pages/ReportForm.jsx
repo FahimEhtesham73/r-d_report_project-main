@@ -32,6 +32,7 @@ export default function ReportForm() {
   const [createReport, { isLoading: isLoadingCreate }] = api.useCreateReportMutation();
   const [updateReport, { isLoading: isLoadingUpdate }] = api.useUpdateReportMutation();
 
+
   const isLoading = isLoadingCreate || isLoadingUpdate;
 
   useEffect(() => {
@@ -41,47 +42,63 @@ export default function ReportForm() {
         description: report.description,
         accuracy: report.accuracy || "", // Set to empty string if accuracy is null
         status: report.status,
-        project: report.project,
-        author: report.author, // Set the author if editing
+        project: report.project._id,
+        author: report.author._id,
+        researchPapers: report.researchPapers // Set the author if editing
       });
-      setFiles(report.files || []); // Load existing files if updating
+  
+      // Check if files are present and set accordingly
+      setFiles(
+        report.files?.map(file => 
+          typeof file === 'string' ? { name: file } : file
+        ) || []
+      );
     }
   }, [report]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formDataObj = new FormData();
-    console.log({ files });
-    // Append the form data
-    Object.keys(formData).forEach((key) => {
-      formDataObj.append(key, formData[key]);
-    });
-    files.forEach((file) => {
-      formDataObj.append("files", file);
-    });
+console.log({formData})
 
-    // Convert accuracy to a number before submitting
-    if (formData.accuracy) {
-      formDataObj.set("accuracy", Number(formData.accuracy));
-    }
-    console.log({ formDataObj });
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const formDataObj = new FormData();
 
-    try {
-      if (id) {
-        await updateReport({ id, ...formDataObj });
-      } else {
-        await createReport(formDataObj)
-          .unwrap()
-          .then((response) => {
-            console.log({ response });
-          });
-      }
-      navigate(`/projects/${formData.project}`);
-    } catch (error) {
-      console.error("Failed to save report:", error);
-      // Optionally show a notification to the user
+  // Append the form data
+  Object.keys(formData).forEach((key) => {
+    formDataObj.append(key, formData[key]);
+  });
+  
+  files.forEach((file) => {
+    formDataObj.append("files", file);
+  });
+
+  // Convert accuracy to a number before submitting
+  if (formData.accuracy) {
+    formDataObj.set("accuracy", Number(formData.accuracy));
+  }
+  
+  console.log([...formDataObj]); // Use spread operator to log FormData contents
+
+  try {
+    if (id) {
+      // Pass formData directly
+      await updateReport({ id, formData: formData })
+        .unwrap()
+        .then((response) => {
+          console.log({ "response update": response });
+        });
+    } else {
+      await createReport(formDataObj)
+        .unwrap()
+        .then((response) => {
+          console.log({ "response create": response });
+        });
+      navigate(`/projects/${formData?.project}`);
     }
-  };
+  } catch (error) {
+    console.error("Failed to save report:", error);
+  }
+};
+
 
   return (
     <Box component="form" onSubmit={handleSubmit}>
@@ -157,10 +174,10 @@ export default function ReportForm() {
               </Button>
             </label>
             {files.length > 0 && (
-              <Typography sx={{ mt: 1 }}>
-                Selected files: {files.map((f) => f.name).join(", ")}
-              </Typography>
-            )}
+  <Typography sx={{ mt: 1 }}>
+    Selected files: {files.map((f) => f.name).join(", ")}
+  </Typography>
+)}
           </Grid>
           <Grid item xs={12}>
             <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>

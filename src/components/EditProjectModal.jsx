@@ -31,15 +31,15 @@ const EditProjectModal = ({ isOpen, closeModal, project }) => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [updateProject, { isLoading }] = api.useUpdateProjectMutation(); // Assuming you have an update mutation
   const navigate = useNavigate();
-console.log(project.projectMembers)
+console.log(project?.projectMembers)
   useEffect(() => {
     if (project) {
-      setTitle(project.title);
-      setUniqueId(project.uniqueId);
-      setDescription(project.description);
-      setProjectLead(project.projectLead);
-      setDuration(project.duration);
-      setSelectedUsers(project.projectMembers);
+      setTitle(project?.title);
+      setUniqueId(project?.uniqueId);
+      setDescription(project?.description);
+      setProjectLead(project?.projectLead);
+      setDuration(project?.duration);
+      setSelectedUsers(project?.projectMembers);
     }
   }, [project]);
 

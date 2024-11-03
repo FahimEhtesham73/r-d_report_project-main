@@ -28,8 +28,8 @@ export default function ProjectDetails() {
   if (isLoading) {
     return <CircularProgress />;
   }
-
-  const isProjectLead = user._id === project.projectLead._id;
+console.log({"project in details":project})
+  const isProjectLead = user._id === project?.projectLead?._id;
   const isMember = project?.projectMembers.some(
     (member) => member._id === user._id
   );
@@ -45,7 +45,7 @@ export default function ProjectDetails() {
           alignItems: "center",
         }}
       >
-        <Typography variant="h4">{project.title}</Typography>
+        <Typography variant="h4">{project?.title}</Typography>
         {canEdit && (
           <Button
             variant="contained"
@@ -81,18 +81,18 @@ project={project}
               <Typography variant="h6" gutterBottom>
                 Description
               </Typography>
-              <Typography>{project.description}</Typography>
+              <Typography>{project?.description}</Typography>
               <Box sx={{ mt: 2 }}>
                 <Typography>
-                  <strong>Status:</strong> {project.status}
+                  <strong>Status:</strong> {project?.status}
                 </Typography>
                 <Typography>
                   <strong>Duration:</strong>{" "}
-                  {new Date(project.duration.startDate).toLocaleDateString()} -{" "}
-                  {new Date(project.duration.endDate).toLocaleDateString()}
+                  {new Date(project?.duration?.startDate).toLocaleDateString()} -{" "}
+                  {new Date(project?.duration?.endDate).toLocaleDateString()}
                 </Typography>
                 <Typography>
-                  <strong>Project Lead:</strong> {project.projectLead.name}
+                  <strong>Project Lead:</strong> {project?.projectLead?.name}
                 </Typography>
               </Box>
             </Paper>
@@ -112,8 +112,8 @@ project={project}
         <TeamList
           projectId={id}
           canManageTeam={canEdit}
-          members={project.projectMembers}
-          lead={project.projectLead}
+          members={project?.projectMembers}
+          lead={project?.projectLead}
         />
       )}
     </Box>
